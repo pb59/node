@@ -314,11 +314,22 @@ window.addEventListener('DOMContentLoaded', () => {
         })
         .then(res => res.json())
         .then(data => {
-            currentQuestion = data.choices[0].message.content.trim();
-            mathQuestion.textContent = currentQuestion;
-            mathAnswer.value = '';
-            mathError.style.display = 'none';
-            mathOverlay.style.display = 'flex';
+            if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                currentQuestion = data.choices[0].message.content.trim();
+                mathQuestion.textContent = currentQuestion;
+                mathAnswer.value = '';
+                mathError.style.display = 'none';
+                mathOverlay.style.display = 'flex';
+            } else if (data.error) {
+                let errorMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+                mathQuestion.textContent = "Error: " + errorMsg;
+                mathOverlay.style.display = 'flex';
+                console.error("Groq API error:", errorMsg);
+            } else {
+                mathQuestion.textContent = "Sorry, could not load a question.";
+                mathOverlay.style.display = 'flex';
+                console.error("Unexpected Groq API response:", data);
+            }
         })
         .catch(err => {
             mathQuestion.textContent = "Sorry, could not load a question.";

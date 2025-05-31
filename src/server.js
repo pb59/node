@@ -1,16 +1,16 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GROQ_API_KEY = 'sk_qJAP3qmYas9s5PVm6wVqWGdyb3FYrxNuONJehgLlbIZNxWB765I7'; // <-- Keep this secret!
+const GROQ_API_KEY = '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'; // <-- Keep this secret!
 
 app.post('/groq', async (req, res) => {
     try {
-        const response = await fetch('https://api.groq.com/v1/chat/completions', {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${GROQ_API_KEY}`,
