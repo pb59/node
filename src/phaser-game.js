@@ -182,7 +182,7 @@ function create() {
 
 // Example function to call Groq LLM from your frontend
 function askGroq(promptText) {
-    fetch('http://localhost:3000/groq', {
+    fetch('/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -202,7 +202,7 @@ function askGroq(promptText) {
 askGroq("Give me a racing tip!");
 
 function checkMathWithLLM(question, userAnswer) {
-    fetch('http://localhost:3000/groq', {
+    fetch('/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -302,7 +302,7 @@ window.addEventListener('DOMContentLoaded', () => {
         userOverlay.style.display = 'none';
 
         // Ask LLM to generate a math question
-        fetch('http://localhost:3000/groq', {
+        fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -341,7 +341,7 @@ window.addEventListener('DOMContentLoaded', () => {
     mathForm.onsubmit = function(e) {
         e.preventDefault();
         // Ask LLM to check the answer
-        fetch('http://localhost:3000/groq', {
+        fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
