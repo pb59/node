@@ -1,6 +1,7 @@
 const express = require('express');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -23,6 +24,15 @@ app.post('/groq', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// Serve static files from the root and src directories
+app.use(express.static(path.join(__dirname, '..')));
+app.use('/src', express.static(path.join(__dirname)));
+
+// Serve Index.html for the root URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'Index.html'));
 });
 
 const PORT = 3000;
