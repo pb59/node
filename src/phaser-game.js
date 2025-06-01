@@ -365,7 +365,8 @@ window.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({
                 model: 'llama3-8b-8192',
                 messages: [
-                    { role: 'user', content: `You are GitHub Copilot. Give me a single math question suitable for a person aged ${userInfo.age}. Only output the question, no answer or explanation.` }
+                    { role: 'user', content: `You are GitHub Copilot. Give me one or two,
+                         simple to medium math question suitable for a person aged ${userInfo.age}. Only output the question, no answer or explanation.` }
                 ]
             })
         })
