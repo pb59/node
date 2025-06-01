@@ -85,6 +85,37 @@
       color: #f66;
       display: none;
     }
+    /* Quiz Overlay Styles */
+    #quizOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #quizQuestion {
+      color: white;
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    #quizAnswer {
+      font-size: 1.2em;
+      margin-bottom: 1em;
+    }
+    #quizNextBtn {
+      font-size: 1.2em;
+    }
+    #quizError {
+      color: red;
+      display: none;
+      margin-top: 1em;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +133,13 @@
       <button type="submit">Submit</button>
       <div id="mathError" style="color:#f66;display:none;">Wrong answer, try again!</div>
     </form>
+  </div>
+  <!-- Quiz Overlay -->
+  <div id="quizOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:100; align-items:center; justify-content:center; flex-direction:column;">
+    <div id="quizQuestion" style="color:white; font-size:1.5em; margin-bottom:1em;"></div>
+    <input id="quizAnswer" type="text" style="font-size:1.2em; margin-bottom:1em;" />
+    <button id="quizNextBtn" style="font-size:1.2em;">Next</button>
+    <div id="quizError" style="color:red;display:none; margin-top:1em;"></div>
   </div>
   <div id="controls">
     <button id="startBtn">START</button>

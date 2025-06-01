@@ -24,6 +24,29 @@ let scoreTimer;
 let gamePaused = true;
 let userInfo = null;
 let mathCorrect = false;
+let level = 1;
+let levelText;
+let aiCarBaseSpeed = 5;
+const LEVEL_UP_SCORE = 100;
+let nextLevelScore = LEVEL_UP_SCORE;
+
+let quizIndex = 0;
+let quizScore = 0;
+
+const quizQuestions = [
+    { type: 'IQ', question: 'What comes next in the sequence: 2, 4, 8, 16, ?', answer: '32' },
+    { type: 'EQ', question: 'How would you help a friend who is sad?', answer: null }, // subjective
+    { type: 'Analytics', question: 'If a car travels 60 km in 1 hour, what is its speed?', answer: '60' },
+    { type: 'Math', question: 'What is 7 + 6?', answer: '13' },
+    // ...add 6 more questions
+];
+
+const iqQuestions = [
+    { question: "WAGMICE runs on which blockchain? (hint: it's fast and cheese-friendly)", answer: "solana" },
+    { question: "If you earn 5 $WGM per game and play 4 games, how many $WGM do you have?", answer: "20" },
+    { question: "What animal is the WAGMICE mascot?", answer: "mouse" },
+    { question: "Is the WAGMICE LP locked? (yes/no)", answer: "yes" }
+];
 
 function preload() {
     // --- Updated car sprites ---
@@ -128,6 +151,9 @@ function create() {
 
     scoreTimer = new ScoreTimer(this);
 
+    // Level display
+    levelText = this.add.text(350, 20, 'Level: 1', { fontSize: '28px', fill: '#fff' }).setOrigin(0.5, 0).setDepth(10);
+
     // Update collision to stop timer/score
     aiCars.forEach(aiCar => {
         this.physics.add.overlap(player, aiCar, () => {
@@ -223,6 +249,20 @@ function checkMathWithLLM(question, userAnswer) {
     });
 }
 
+function levelUp(scene) {
+    level++;
+    aiCarBaseSpeed += 2; // Increase AI car speed
+    if (levelText) levelText.setText('Level: ' + level);
+    // Show a level up message and remove it after 1.5 seconds
+    const msg = scene.add.text(350, 300, 'Level Up!', { fontSize: '48px', fill: '#0f0' })
+        .setOrigin(0.5)
+        .setDepth(20)
+        .setAlpha(1);
+    scene.time.delayedCall(1500, function() {
+        msg.destroy();
+    });
+}
+
 function update() {
     if (gamePaused) return;
 
@@ -268,9 +308,15 @@ function update() {
     // Update timer
     if (scoreTimer) scoreTimer.updateTimer(this.game.loop.delta);
 
+    // Level up logic
+    if (scoreTimer && scoreTimer.score >= nextLevelScore) {
+        levelUp(this);
+        nextLevelScore += LEVEL_UP_SCORE;
+    }
+
     // Example: When an AI car is avoided, add score
     aiCars.forEach(aiCar => {
-        aiCar.y += 5;
+        aiCar.y += aiCarBaseSpeed;
         if (aiCar.y > 650) {
             aiCar.y = -100;
             aiCar.x = Phaser.Math.Between(250, 450);
@@ -290,6 +336,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const mathAnswer = document.getElementById('mathAnswer');
     const mathError = document.getElementById('mathError');
     const startBtn = document.getElementById('startBtn');
+    const quizOverlay = document.getElementById('quizOverlay');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizAnswer = document.getElementById('quizAnswer');
+    const quizNextBtn = document.getElementById('quizNextBtn');
+    const quizError = document.getElementById('quizError');
 
     let currentQuestion = "";
 
@@ -300,54 +351,47 @@ window.addEventListener('DOMContentLoaded', () => {
             age: parseInt(document.getElementById('userAge').value, 10)
         };
         userOverlay.style.display = 'none';
+        showWagmiceMessage(userInfo.name, userInfo.age);
 
-        // Ask LLM to generate a math question
+        // Fetch a math question from GitHub Copilot (LLM) based on user age
+        mathQuestion.textContent = "Loading question from GitHub Copilot...";
+        mathAnswer.value = '';
+        mathError.style.display = 'none';
+        mathOverlay.style.display = 'flex';
+
         fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model: 'llama3-8b-8192',
                 messages: [
-                    { role: 'user', content: `Generate a very easy math question for a child of age ${userInfo.age}. Only give the question, not the answer.` }
+                    { role: 'user', content: `You are GitHub Copilot. Give me a single math question suitable for a person aged ${userInfo.age}. Only output the question, no answer or explanation.` }
                 ]
             })
         })
         .then(res => res.json())
         .then(data => {
-            if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-                currentQuestion = data.choices[0].message.content.trim();
-                mathQuestion.textContent = currentQuestion;
-                mathAnswer.value = '';
-                mathError.style.display = 'none';
-                mathOverlay.style.display = 'flex';
-            } else if (data.error) {
-                let errorMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
-                mathQuestion.textContent = "Error: " + errorMsg;
-                mathOverlay.style.display = 'flex';
-                console.error("Groq API error:", errorMsg);
-            } else {
-                mathQuestion.textContent = "Sorry, could not load a question.";
-                mathOverlay.style.display = 'flex';
-                console.error("Unexpected Groq API response:", data);
-            }
+            const llmQuestion = data.choices[0].message.content.trim();
+            mathQuestion.textContent = llmQuestion + " (Generated by GitHub Copilot)";
+            currentQuestion = llmQuestion;
         })
         .catch(err => {
-            mathQuestion.textContent = "Sorry, could not load a question.";
-            mathOverlay.style.display = 'flex';
+            mathQuestion.textContent = "What is 2 + 2? (Fallback from GitHub Copilot)";
+            currentQuestion = "What is 2 + 2?";
             console.error("LLM error:", err);
         });
     };
 
     mathForm.onsubmit = function(e) {
         e.preventDefault();
-        // Ask LLM to check the answer
+        // Ask GitHub Copilot (LLM) to check the answer
         fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model: 'llama3-8b-8192',
                 messages: [
-                    { role: 'user', content: `Is the answer to "${currentQuestion}" equal to ${mathAnswer.value}? Reply only "yes" or "no".` }
+                    { role: 'user', content: `You are GitHub Copilot. Is the answer to "${currentQuestion}" equal to ${mathAnswer.value}? Reply only "yes" or "no".` }
                 ]
             })
         })
@@ -363,7 +407,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         })
         .catch(err => {
-            mathError.textContent = "Could not check answer.";
+            mathError.textContent = "Could not check answer (GitHub Copilot error).";
             mathError.style.display = 'block';
             console.error("LLM error:", err);
         });
@@ -371,4 +415,102 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Disable start button until math is passed
     startBtn.disabled = true;
+
+    // Quiz functions
+    function startQuiz() {
+        quizIndex = 0;
+        quizScore = 0;
+        showQuizQuestion();
+        document.getElementById('quizOverlay').style.display = 'flex';
+    }
+
+    function showQuizQuestion() {
+        const q = quizQuestions[quizIndex];
+        document.getElementById('quizQuestion').textContent = `[${q.type}] ${q.question}`;
+        document.getElementById('quizAnswer').value = '';
+        document.getElementById('quizError').style.display = 'none';
+    }
+
+    document.getElementById('quizNextBtn').onclick = function() {
+        const userAns = document.getElementById('quizAnswer').value.trim();
+        const q = quizQuestions[quizIndex];
+
+        // Simple scoring: for subjective, always give 1 point; for objective, check answer
+        if (q.answer === null || q.answer === '') {
+            quizScore += 1;
+        } else if (userAns.toLowerCase() === q.answer.toLowerCase()) {
+            quizScore += 1;
+        }
+
+        quizIndex++;
+        if (quizIndex < quizQuestions.length) {
+            showQuizQuestion();
+        } else {
+            document.getElementById('quizOverlay').style.display = 'none';
+            alert(`Quiz complete! Your score: ${quizScore}/${quizQuestions.length}`);
+            // Optionally, use quizScore in your game (e.g., set level, unlock features, etc.)
+        }
+    };
+
+    const iqQuizIndex = 0;
+    let iqQuizScore = 0;
+
+    function startIQQuiz() {
+        iqQuizIndex = 0;
+        iqQuizScore = 0;
+        quizOverlay.style.display = 'flex';
+        showIQQuestion();
+    }
+
+    function showIQQuestion() {
+        quizQuestion.textContent = iqQuestions[iqQuizIndex].question;
+        quizAnswer.value = '';
+        quizError.style.display = 'none';
+    }
+
+    quizNextBtn.onclick = function() {
+        const userAns = quizAnswer.value.trim().toLowerCase();
+        const correctAns = iqQuestions[iqQuizIndex].answer.toLowerCase();
+        if (userAns === correctAns) {
+            iqQuizScore += 1;
+        }
+        iqQuizIndex++;
+        if (iqQuizIndex < iqQuestions.length) {
+            showIQQuestion();
+        } else {
+            quizOverlay.style.display = 'none';
+            alert(`Quiz complete! Your score: ${iqQuizScore}/${iqQuestions.length}`);
+            // Now show the math challenge overlay
+            mathOverlay.style.display = 'flex';
+        }
+    };
+
+    function getPronoun(name) {
+        // Very basic guess: names ending in 'a', 'i', 'e' are often female
+        const lower = name.trim().toLowerCase();
+        if (lower.endsWith('a') || lower.endsWith('i') || lower.endsWith('e')) return 'she';
+        return 'he';
+    }
+
+    function showWagmiceMessage(name, age) {
+        const pronoun = getPronoun(name);
+        const msg = `Hey ${name}! At age ${age}, ${pronoun} is just the right kind of sharp to join the WAGMICE revolution 🐭🚀.
+
+Before you dive into the world of $WGM on Solana, let's see how quick your mind is with a few IQ warm-ups. Remember: in crypto and in life, brains beat hype every time!
+
+Ready? Let's go!`;
+        alert(msg);
+    }
+
+    function showQuizCompletion(name, score, total) {
+        alert(`Awesome job, ${name}! You scored ${score}/${total} on the WAGMICE IQ check.
+
+Just like $WGM, you’re built for fun and growth. Now, let’s see if you can solve a quick math challenge — because every good investor knows their numbers!`);
+    }
+
+    alert(`Math master! You're ready for the big leagues. Remember, $WGM isn't just a meme — it's a movement. Play, earn, and join the WAGMICE family. 🚗💨
+
+Want to buy? Check out Pump.fun, Raydium, or Jupiter. Need help? Hop into our Telegram: https://t.me/WagmicePortal
+
+Now, let’s race!`);
 });
