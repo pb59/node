@@ -1,4 +1,5 @@
 import { ScoreTimer } from './scoreTimer.js';
+import { startIQQuizLLM } from './iqQuiz.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -201,7 +202,7 @@ function create() {
         this.scene.pause();
         if (scoreTimer) scoreTimer.stop();
         startBtn.style.display = '';
-        restartBtn.style.display = '';
+        restartBtn.style.display = 'none';
         stopBtn.style.display = 'none';
     };
 }
@@ -251,15 +252,38 @@ function checkMathWithLLM(question, userAnswer) {
 
 function levelUp(scene) {
     level++;
-    aiCarBaseSpeed += 2; // Increase AI car speed
+    aiCarBaseSpeed += 2;
     if (levelText) levelText.setText('Level: ' + level);
+
     // Show a level up message and remove it after 1.5 seconds
     const msg = scene.add.text(350, 300, 'Level Up!', { fontSize: '48px', fill: '#0f0' })
         .setOrigin(0.5)
         .setDepth(20)
         .setAlpha(1);
+
     scene.time.delayedCall(1500, function() {
         msg.destroy();
+
+        // If just completed level 1, pause and congratulate
+        if (level === 2) {
+            gamePaused = true;
+            scene.scene.pause();
+            if (scoreTimer) scoreTimer.stop();
+            setTimeout(() => {
+                alert("🎉 Congratulations! As the Wagmice Manager, you completed Level 1!\n\nGet ready for the next challenge!");
+                // Now start the IQ quiz
+                startIQQuizLLM({
+                    userInfo,
+                    onComplete: (score, total) => {
+                        alert(`Ready for the next challenge!`);
+                        // Resume game here if paused
+                        gamePaused = false;
+                        scene.scene.resume();
+                        if (scoreTimer) scoreTimer.active = true;
+                    }
+                });
+            }, 300);
+        }
     });
 }
 
@@ -328,6 +352,8 @@ function update() {
 const game = new Phaser.Game(config);
 
 window.addEventListener('DOMContentLoaded', () => {
+    alert("Welcome to the WAGMICE 2D Car Racing Game!\n\nBefore you start, please enter your name and age to join the WAGMICE revolution 🐭🚗💨");
+
     const userOverlay = document.getElementById('userFormOverlay');
     const userForm = document.getElementById('userForm');
     const mathOverlay = document.getElementById('mathChallengeOverlay');
@@ -551,10 +577,4 @@ Ready? Let's go!`;
 
 Just like $WGM, you’re built for fun and growth. Now, let’s see if you can solve a quick math challenge — because every good investor knows their numbers!`);
     }
-
-    alert(`Math master! You're ready for the big leagues. Remember, $WGM isn't just a meme — it's a movement. Play, earn, and join the WAGMICE family. 🚗💨
-
-Want to buy? Check out Pump.fun, Raydium, or Jupiter. Need help? Hop into our Telegram: https://t.me/WagmicePortal
-
-Now, let’s race!`);
 });

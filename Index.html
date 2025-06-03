@@ -116,6 +116,33 @@
       display: none;
       margin-top: 1em;
     }
+    /* IQ Quiz Overlay Styles */
+    #iqQuizOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 102;
+      flex-direction: column;
+    }
+    #iqQuestion {
+      color: #fff;
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
+    #iqAnswer {
+      margin-bottom: 10px;
+    }
+    #iqError {
+      color: #f66;
+      display: none;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -140,6 +167,15 @@
     <input id="quizAnswer" type="text" style="font-size:1.2em; margin-bottom:1em;" />
     <button id="quizNextBtn" style="font-size:1.2em;">Next</button>
     <div id="quizError" style="color:red;display:none; margin-top:1em;"></div>
+  </div>
+  <!-- IQ Quiz Overlay -->
+  <div id="iqQuizOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;z-index:102;flex-direction:column;">
+    <form id="iqQuizForm" style="display:flex;flex-direction:column;align-items:center;">
+      <div id="iqQuestion" style="color:#fff;font-size:1.3em;margin-bottom:10px;"></div>
+      <input id="iqAnswer" type="text" autocomplete="off" style="margin-bottom:10px;" />
+      <button type="button" id="iqNextBtn">Next</button>
+      <div id="iqError" style="color:#f66;display:none;margin-top:8px;"></div>
+    </form>
   </div>
   <div id="controls">
     <button id="startBtn">START</button>
