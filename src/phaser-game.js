@@ -5,7 +5,7 @@ const config = {
     type: Phaser.AUTO,
     width: 700,
     height: 600,
-    backgroundColor: "#87ceeb", // Sky blue fallback
+    backgroundColor: "#87ceeb",
     physics: {
         default: 'arcade',
         arcade: { debug: false }
@@ -31,28 +31,8 @@ let aiCarBaseSpeed = 5;
 const LEVEL_UP_SCORE = 100;
 let nextLevelScore = LEVEL_UP_SCORE;
 
-let quizIndex = 0;
-let quizScore = 0;
-
-const quizQuestions = [
-    { type: 'IQ', question: 'What comes next in the sequence: 2, 4, 8, 16, ?', answer: '32' },
-    { type: 'EQ', question: 'How would you help a friend who is sad?', answer: null }, // subjective
-    { type: 'Analytics', question: 'If a car travels 60 km in 1 hour, what is its speed?', answer: '60' },
-    { type: 'Math', question: 'What is 7 + 6?', answer: '13' },
-    // ...add 6 more questions
-];
-
-const iqQuestions = [
-    { question: "WAGMICE runs on which blockchain? (hint: it's fast and cheese-friendly)", answer: "solana" },
-    { question: "If you earn 5 $WGM per game and play 4 games, how many $WGM do you have?", answer: "20" },
-    { question: "What animal is the WAGMICE mascot?", answer: "mouse" },
-    { question: "Is the WAGMICE LP locked? (yes/no)", answer: "yes" }
-];
-
 function preload() {
-    // --- Updated car sprites ---
-    this.load.image('playerCar', 'src/png/cars/redcar.png'); // Updated to redcar
-    //this.load.image('playerCar', 'src/png/cars/bus.png');   
+    this.load.image('playerCar', 'src/png/cars/redcar.png');
     this.load.image('aiCar1', 'src/png/cars/sports_green.png');
     this.load.image('aiCar2', 'src/png/cars/sports_yellow.png');
     this.load.image('aiCar3', 'src/png/cars/sedan_blue.png');
@@ -70,7 +50,7 @@ function create() {
 
     // --- Mountains (draw after sky, before grass/road) ---
     const mountain = this.add.graphics();
-    mountain.fillStyle(0xc2b280, 1); // lighter brown
+    mountain.fillStyle(0xc2b280, 1);
     mountain.beginPath();
     mountain.moveTo(0, 350);
     mountain.lineTo(80, 220);
@@ -117,7 +97,7 @@ function create() {
 
     // --- Road barriers ---
     this.add.rectangle(200, 300, 10, 600, 0x888888).setDepth(-16);
-    this.add.rectangle(500, 300, 10, 600, 0x888888).setDepth(-16); // <-- changed from 490 to 500
+    this.add.rectangle(500, 300, 10, 600, 0x888888).setDepth(-16);
 
     // --- Lane markings and tree array for animation ---
     this.laneOffset = 0;
@@ -132,7 +112,6 @@ function create() {
 
     // --- Player and AI cars ---
     player = this.physics.add.sprite(350, 500, 'playerCar').setScale(0.03);
-    // Make the player's physics body even smaller for tighter collision
     player.body.setSize(player.width * 0.6, player.height * 0.6);
     player.body.setOffset(player.width * 0.2, player.height * 0.2);
 
@@ -142,7 +121,6 @@ function create() {
         this.physics.add.sprite(350, -500, 'aiCar3').setScale(0.7)
     ];
 
-    // Make AI cars' physics bodies even smaller for tighter collision
     aiCars.forEach(aiCar => {
         aiCar.body.setSize(aiCar.width * 0.6, aiCar.height * 0.6);
         aiCar.body.setOffset(aiCar.width * 0.2, aiCar.height * 0.2);
@@ -155,7 +133,6 @@ function create() {
     // Level display
     levelText = this.add.text(350, 20, 'Level: 1', { fontSize: '28px', fill: '#fff' }).setOrigin(0.5, 0).setDepth(10);
 
-    // Update collision to stop timer/score
     aiCars.forEach(aiCar => {
         this.physics.add.overlap(player, aiCar, () => {
             this.add.text(200, 300, 'Collision!', { fontSize: '48px', fill: '#ff0' });
@@ -164,25 +141,22 @@ function create() {
         });
     });
 
-    // --- Background Music ---
     this.sound.add('bgMusic').setLoop(true).play();
 
-    // --- UI Buttons ---
     const startBtn = document.getElementById('startBtn');
     const restartBtn = document.getElementById('restartBtn');
     const stopBtn = document.getElementById('stopBtn');
 
-    // Start with game paused and only start button visible
     this.scene.pause();
     startBtn.style.display = '';
     restartBtn.style.display = 'none';
     stopBtn.style.display = 'none';
 
     startBtn.onclick = () => {
-        if (!mathCorrect) return; // Prevent starting if math not passed
+        if (!mathCorrect) return;
         gamePaused = false;
         this.scene.resume();
-        if (scoreTimer) scoreTimer.active = true; // <-- Add this
+        if (scoreTimer) scoreTimer.active = true;
         startBtn.style.display = 'none';
         restartBtn.style.display = '';
         stopBtn.style.display = '';
@@ -191,7 +165,6 @@ function create() {
     restartBtn.onclick = () => {
         this.scene.restart();
         gamePaused = false;
-        // scoreTimer will be re-initialized in create()
         startBtn.style.display = 'none';
         restartBtn.style.display = '';
         stopBtn.style.display = '';
@@ -207,7 +180,6 @@ function create() {
     };
 }
 
-// Example function to call Groq LLM from your frontend
 function askGroq(promptText) {
     fetch('/groq', {
         method: 'POST',
@@ -219,14 +191,9 @@ function askGroq(promptText) {
     })
     .then(res => res.json())
     .then(data => {
-        // Do something with the response, e.g. show in game
         console.log(data.choices[0].message.content);
-        // You can display it in your game UI as needed
     });
 }
-
-// Example usage (call this from a button or event)
-askGroq("Give me a racing tip!");
 
 function checkMathWithLLM(question, userAnswer) {
     fetch('/groq', {
@@ -255,7 +222,6 @@ function levelUp(scene) {
     aiCarBaseSpeed += 2;
     if (levelText) levelText.setText('Level: ' + level);
 
-    // Show a level up message and remove it after 1.5 seconds
     const msg = scene.add.text(350, 300, 'Level Up!', { fontSize: '48px', fill: '#0f0' })
         .setOrigin(0.5)
         .setDepth(20)
@@ -264,19 +230,17 @@ function levelUp(scene) {
     scene.time.delayedCall(1500, function() {
         msg.destroy();
 
-        // If just completed level 1, pause and congratulate
         if (level === 2) {
             gamePaused = true;
             scene.scene.pause();
             if (scoreTimer) scoreTimer.stop();
             setTimeout(() => {
                 alert("🎉 Congratulations! As the Wagmice Manager, you completed Level 1!\n\nGet ready for the next challenge!");
-                // Now start the IQ quiz
                 startIQQuizLLM({
                     userInfo,
+                    scene,
                     onComplete: (score, total) => {
-                        alert(`Ready for the next challenge!`);
-                        // Resume game here if paused
+                        alert(`IQ Quiz complete! You scored ${score}/${total}. Ready for the next challenge!`);
                         gamePaused = false;
                         scene.scene.resume();
                         if (scoreTimer) scoreTimer.active = true;
@@ -296,13 +260,11 @@ function update() {
     this.clouds.forEach(cloud => {
         cloud.x += cloud.speed;
         if (cloud.x > 750) cloud.x = -50;
-        // Draw cloud as three circles
         this.cloudGraphics.fillCircle(cloud.x, cloud.y, 22);
         this.cloudGraphics.fillCircle(cloud.x + 20, cloud.y + 8, 18);
         this.cloudGraphics.fillCircle(cloud.x - 20, cloud.y + 8, 16);
     });
 
-    // --- Animate lane markings ---
     this.laneOffset = (this.laneOffset + 5) % 80;
     this.laneGraphics.clear();
     this.laneGraphics.lineStyle(6, 0xffffff, 1);
@@ -310,35 +272,28 @@ function update() {
         this.laneGraphics.strokeLineShape(new Phaser.Geom.Line(350, y, 350, y + 40));
     }
 
-    // --- Animate and draw trees ---
     this.trees.forEach(tree => {
         tree.y += 2;
         if (tree.y > 600) tree.y = -60;
-        // Trunk
         this.laneGraphics.fillStyle(0x8B5A2B, 1);
         this.laneGraphics.fillRect(tree.x + 7, tree.y + 30, 6, 20);
-        // Leaves
         this.laneGraphics.fillStyle(0x228B22, 1);
         this.laneGraphics.fillCircle(tree.x + 10, tree.y + 30, 18);
     });
 
-    // --- Car movement and AI ---
     player.setVelocity(0);
     if (cursors.left.isDown && player.x > 220) player.x -= 5;
     if (cursors.right.isDown && player.x < 480) player.x += 5;
     if (cursors.up.isDown && player.y > 0) player.y -= 5;
     if (cursors.down.isDown && player.y < 600 - player.height * 0.7) player.y += 5;
 
-    // Update timer
     if (scoreTimer) scoreTimer.updateTimer(this.game.loop.delta);
 
-    // Level up logic
     if (scoreTimer && scoreTimer.score >= nextLevelScore) {
         levelUp(this);
         nextLevelScore += LEVEL_UP_SCORE;
     }
 
-    // Example: When an AI car is avoided, add score
     aiCars.forEach(aiCar => {
         aiCar.y += aiCarBaseSpeed;
         if (aiCar.y > 650) {
@@ -362,13 +317,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const mathAnswer = document.getElementById('mathAnswer');
     const mathError = document.getElementById('mathError');
     const startBtn = document.getElementById('startBtn');
-    const quizOverlay = document.getElementById('quizOverlay');
-    const quizQuestion = document.getElementById('quizQuestion');
-    const quizAnswer = document.getElementById('quizAnswer');
-    const quizNextBtn = document.getElementById('quizNextBtn');
-    const quizError = document.getElementById('quizError');
 
-    let currentQuestion = "";
     let mathQuestions = [];
     let currentMathIndex = 0;
     let mathScore = 0;
@@ -399,7 +348,6 @@ window.addEventListener('DOMContentLoaded', () => {
         })
         .then(res => res.json())
         .then(data => {
-            // Parse the LLM response into an array of questions
             const lines = data.choices[0].message.content.trim().split('\n').filter(l => l.trim());
             mathQuestions = lines.map(l => l.replace(/^\d+\.\s*/, '').trim());
             currentMathIndex = 0;
@@ -431,7 +379,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     mathForm.onsubmit = function(e) {
         e.preventDefault();
-        // Ask LLM to check the answer
         fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -486,77 +433,7 @@ Want to buy? Check out Pump.fun, Raydium, or Jupiter. Need help? Hop into our Te
 Now, let’s race!`);
     }
 
-    // Quiz functions
-    function startQuiz() {
-        quizIndex = 0;
-        quizScore = 0;
-        showQuizQuestion();
-        document.getElementById('quizOverlay').style.display = 'flex';
-    }
-
-    function showQuizQuestion() {
-        const q = quizQuestions[quizIndex];
-        document.getElementById('quizQuestion').textContent = `[${q.type}] ${q.question}`;
-        document.getElementById('quizAnswer').value = '';
-        document.getElementById('quizError').style.display = 'none';
-    }
-
-    document.getElementById('quizNextBtn').onclick = function() {
-        const userAns = document.getElementById('quizAnswer').value.trim();
-        const q = quizQuestions[quizIndex];
-
-        // Simple scoring: for subjective, always give 1 point; for objective, check answer
-        if (q.answer === null || q.answer === '') {
-            quizScore += 1;
-        } else if (userAns.toLowerCase() === q.answer.toLowerCase()) {
-            quizScore += 1;
-        }
-
-        quizIndex++;
-        if (quizIndex < quizQuestions.length) {
-            showQuizQuestion();
-        } else {
-            document.getElementById('quizOverlay').style.display = 'none';
-            alert(`Quiz complete! Your score: ${quizScore}/${quizQuestions.length}`);
-            // Optionally, use quizScore in your game (e.g., set level, unlock features, etc.)
-        }
-    };
-
-    const iqQuizIndex = 0;
-    let iqQuizScore = 0;
-
-    function startIQQuiz() {
-        iqQuizIndex = 0;
-        iqQuizScore = 0;
-        quizOverlay.style.display = 'flex';
-        showIQQuestion();
-    }
-
-    function showIQQuestion() {
-        quizQuestion.textContent = iqQuestions[iqQuizIndex].question;
-        quizAnswer.value = '';
-        quizError.style.display = 'none';
-    }
-
-    quizNextBtn.onclick = function() {
-        const userAns = quizAnswer.value.trim().toLowerCase();
-        const correctAns = iqQuestions[iqQuizIndex].answer.toLowerCase();
-        if (userAns === correctAns) {
-            iqQuizScore += 1;
-        }
-        iqQuizIndex++;
-        if (iqQuizIndex < iqQuestions.length) {
-            showIQQuestion();
-        } else {
-            quizOverlay.style.display = 'none';
-            alert(`Quiz complete! Your score: ${iqQuizScore}/${iqQuestions.length}`);
-            // Now show the math challenge overlay
-            mathOverlay.style.display = 'flex';
-        }
-    };
-
     function getPronoun(name) {
-        // Very basic guess: names ending in 'a', 'i', 'e' are often female
         const lower = name.trim().toLowerCase();
         if (lower.endsWith('a') || lower.endsWith('i') || lower.endsWith('e')) return 'she';
         return 'he';
@@ -570,11 +447,5 @@ Before you dive into the world of $WGM on Solana, let's see how quick your mind 
 
 Ready? Let's go!`;
         alert(msg);
-    }
-
-    function showQuizCompletion(name, score, total) {
-        alert(`Awesome job, ${name}! You scored ${score}/${total} on the WAGMICE IQ check.
-
-Just like $WGM, you’re built for fun and growth. Now, let’s see if you can solve a quick math challenge — because every good investor knows their numbers!`);
     }
 });

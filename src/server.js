@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GROQ_API_KEY = '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'; // <-- Keep this secret!
+const GROQ_API_KEY = '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'; // <-- Keep this secret!
 
 app.post('/groq', async (req, res) => {
     try {

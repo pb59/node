@@ -1,4 +1,4 @@
-export function startIQQuizLLM({ userInfo, onComplete }) {
+export function startIQQuizLLM({ userInfo, scene, onComplete }) {
     const iqOverlay = document.getElementById('iqQuizOverlay');
     const iqQuestion = document.getElementById('iqQuestion');
     const iqAnswer = document.getElementById('iqAnswer');
@@ -52,14 +52,11 @@ export function startIQQuizLLM({ userInfo, onComplete }) {
             iqAnswer.value = '';
             iqError.style.display = 'none';
         } else {
-            iqOverlay.style.display = 'none';
-            showIQAppreciation();
-            if (onComplete) onComplete(iqScore, iqQuestions.length);
+            finishIQQuiz();
         }
     }
 
     iqNextBtn.onclick = function() {
-        // Ask LLM to check the answer
         fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -86,15 +83,8 @@ export function startIQQuizLLM({ userInfo, onComplete }) {
         });
     };
 
-    function showIQAppreciation() {
-        let msg = `You got ${iqScore}/5 correct! `;
-        if (iqScore === 5) {
-            msg += "IQ champion! 🚀";
-        } else if (iqScore >= 3) {
-            msg += "Great job! You're quick and clever!";
-        } else {
-            msg += "Keep practicing, your mind will get sharper!";
-        }
-        alert(msg + `\n\nWAGMICE believes in smart racers!`);
+    function finishIQQuiz() {
+        iqOverlay.style.display = 'none';
+        if (onComplete) onComplete(iqScore, iqQuestions.length);
     }
 }
