@@ -3,11 +3,15 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const cors = require('cors');
 const path = require('path');
 
+// Add dotenv to load environment variables
+require('dotenv').config();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GROQ_API_KEY = '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'; // <-- Keep this secret!
+// Use environment variable for API key
+const GROQ_API_KEY = process.env.GROQ_API_KEY; // <-- Secure: not in code!
 
 app.post('/groq', async (req, res) => {
     try {

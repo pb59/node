@@ -1,5 +1,6 @@
 import { ScoreTimer } from './scoreTimer.js';
 import { startIQQuizLLM } from './iqQuiz.js';
+import { startEQQuizLLM } from './eqQuiz.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -146,11 +147,13 @@ function create() {
     const startBtn = document.getElementById('startBtn');
     const restartBtn = document.getElementById('restartBtn');
     const stopBtn = document.getElementById('stopBtn');
+    const iqNextBtn = document.getElementById('iqNextBtn');
 
     this.scene.pause();
     startBtn.style.display = '';
     restartBtn.style.display = 'none';
     stopBtn.style.display = 'none';
+    iqNextBtn.style.display = 'none';
 
     startBtn.onclick = () => {
         if (!mathCorrect) return;
@@ -231,6 +234,7 @@ function levelUp(scene) {
         msg.destroy();
 
         if (level === 2) {
+            // Only IQ quiz at level 2
             gamePaused = true;
             scene.scene.pause();
             if (scoreTimer) scoreTimer.stop();
@@ -241,6 +245,26 @@ function levelUp(scene) {
                     scene,
                     onComplete: (score, total) => {
                         alert(`IQ Quiz complete! You scored ${score}/${total}. Ready for the next challenge!`);
+                        gamePaused = false;
+                        scene.scene.resume();
+                        if (scoreTimer) scoreTimer.active = true;
+                    }
+                });
+            }, 300);
+        }
+
+        // EQ quiz at level 3 (i.e., after completing level 2)
+        if (level === 3) {
+            gamePaused = true;
+            scene.scene.pause();
+            if (scoreTimer) scoreTimer.stop();
+            setTimeout(() => {
+                alert("🎉 Amazing! You completed Level 2!\n\nNow, let's see how emotionally smart you are with a quick EQ test.");
+                startEQQuizLLM({
+                    userInfo,
+                    scene,
+                    onComplete: (eqScore, eqTotal) => {
+                        alert(`EQ Quiz complete! You scored ${eqScore}/${eqTotal}. You're ready to race again!`);
                         gamePaused = false;
                         scene.scene.resume();
                         if (scoreTimer) scoreTimer.active = true;
@@ -317,6 +341,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const mathAnswer = document.getElementById('mathAnswer');
     const mathError = document.getElementById('mathError');
     const startBtn = document.getElementById('startBtn');
+    const iqNextBtn = document.getElementById('iqNextBtn');
 
     let mathQuestions = [];
     let currentMathIndex = 0;
@@ -326,7 +351,9 @@ window.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         userInfo = {
             name: document.getElementById('userName').value,
-            age: parseInt(document.getElementById('userAge').value, 10)
+            age: parseInt(document.getElementById('userAge').value, 10),
+            skill: document.getElementById('userSkill').value,
+            expertise: parseInt(document.getElementById('userExpertise').value, 10)
         };
         userOverlay.style.display = 'none';
         showWagmiceMessage(userInfo.name, userInfo.age);

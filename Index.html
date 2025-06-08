@@ -150,6 +150,10 @@
     <form id="userForm" style="background:#222;padding:32px 40px;border-radius:12px;box-shadow:0 0 20px #000;display:flex;flex-direction:column;gap:18px;min-width:300px;">
       <label style="color:#fff;">Name: <input type="text" id="userName" required /></label>
       <label style="color:#fff;">Age: <input type="number" id="userAge" min="1" required /></label>
+      <label for="userSkill" style="color:#fff;">Skill Set:</label>
+      <input type="text" id="userSkill" name="userSkill" required placeholder="e.g. Python, Trading, Gaming" style="padding: 8px; border-radius: 4px; border: 1px solid #333;">
+      <label for="userExpertise" style="color:#fff;">Expertise Level (1-10):</label>
+      <input type="number" id="userExpertise" name="userExpertise" min="1" max="10" required style="padding: 8px; border-radius: 4px; border: 1px solid #333;">
       <button type="submit" style="font-size:1.1em;padding:8px 0;">Start Game</button>
     </form>
   </div>
@@ -170,12 +174,10 @@
   </div>
   <!-- IQ Quiz Overlay -->
   <div id="iqQuizOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;z-index:102;flex-direction:column;">
-    <form id="iqQuizForm" style="display:flex;flex-direction:column;align-items:center;">
-      <div id="iqQuestion" style="color:#fff;font-size:1.3em;margin-bottom:10px;"></div>
-      <input id="iqAnswer" type="text" autocomplete="off" style="margin-bottom:10px;" />
-      <button type="button" id="iqNextBtn">Next</button>
-      <div id="iqError" style="color:#f66;display:none;margin-top:8px;"></div>
-    </form>
+    <div id="iqQuestion" style="color:#fff;font-size:1.3em;margin-bottom:10px;"></div>
+    <input id="iqAnswer" type="text" autocomplete="off" style="margin-bottom:10px;" />
+    <button type="button" id="iqNextBtn">Submit</button>
+    <div id="iqError" style="color:#f66;display:none;margin-top:8px;"></div>
   </div>
   <div id="controls">
     <button id="startBtn">START</button>

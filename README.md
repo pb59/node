@@ -7,13 +7,19 @@ This project is a simple 2D car racing game built using HTML5 and JavaScript. Th
 ```
 car-racing-game
 ├── src
-│   ├── game.js          # Main game logic
-│   ├── assets           # Game assets (images, sounds, etc.)
-│   └── utils
-│       └── helpers.js   # Utility functions
-├── Index.html           # Main HTML document
-├── package.json         # npm configuration file
-└── README.md            # Project documentation
+│   ├── phaser-game.js      # Main Phaser game logic
+│   ├── iqQuiz.js           # IQ quiz logic (LLM-powered)
+│   ├── eqQuiz.js           # EQ quiz logic (LLM-powered)
+│   ├── scoreTimer.js       # Score and timer logic
+│   ├── server.js           # Node.js backend server (API proxy)
+│   └── png
+│       ├── cars/           # Car images
+│       └── audio/          # Audio files
+├── Index.html              # Main HTML document
+├── package.json            # npm configuration file
+├── .env                    # Environment variables (not committed)
+├── .gitignore              # Git ignore file
+└── README.md               # Project documentation
 ```
 
 ## Getting Started
@@ -38,6 +44,23 @@ car-racing-game
 ### Running the Game
 1. Open `Index.html` in your web browser.
 2. Use the arrow keys to control the car.
+
+## Committing Your Changes
+
+To commit your changes to GitHub:
+
+1. Stage your changes:
+   ```
+   git add .
+   ```
+2. Commit with a message:
+   ```
+   git commit -m "Describe your changes"
+   ```
+3. Push to your repository:
+   ```
+   git push
+   ```
 
 ## Contributing
 Feel free to submit issues or pull requests if you would like to contribute to the project.
