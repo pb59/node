@@ -5,8 +5,8 @@ import { startSkillQuizLLM } from './skillQuiz.js';
 
 const config = {
     type: Phaser.AUTO,
-    width: 700,
-    height: 600,
+    width: Math.min(window.innerWidth, 700),
+    height: Math.min(window.innerHeight, 600),
     backgroundColor: "#87ceeb",
     physics: {
         default: 'arcade',
@@ -370,17 +370,6 @@ Now, let’s race!`);
                                     <a href="https://pb59.github.io/WagmiceToken/" target="_blank" style="color:#ffd700;font-size:1.1em;margin-top:1em;">Visit Official Website</a>
                                     <p style="margin-top:2em;font-size:1.2em;">🐭🚗💨</p>
                                 </div>
-                                <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-                                <script>
-                                document.getElementById('downloadCertBtn').onclick = function() {
-                                    html2canvas(document.getElementById('wagmice-certificate')).then(canvas => {
-                                        const link = document.createElement('a');
-                                        link.download = 'wagmice-certificate.png';
-                                        link.href = canvas.toDataURL();
-                                        link.click();
-                                    });
-                                };
-                                </script>
                             `;
                         }, 500);
                     }
@@ -595,5 +584,26 @@ Ready? Let's go!`;
 
     if (window.game) {
         window.game.destroy(true);
+    }
+
+    // Load html2canvas if not already loaded
+    if (!window.html2canvas) {
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+        script.onload = attachDownloadHandler;
+        document.body.appendChild(script);
+    } else {
+        attachDownloadHandler();
+    }
+
+    function attachDownloadHandler() {
+        document.getElementById('downloadCertBtn').onclick = function() {
+            html2canvas(document.getElementById('wagmice-certificate')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'wagmice-certificate.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        };
     }
 });
