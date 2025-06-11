@@ -1,6 +1,7 @@
 import { ScoreTimer } from './scoreTimer.js';
 import { startIQQuizLLM } from './iqQuiz.js';
 import { startEQQuizLLM } from './eqQuiz.js';
+import { startSkillQuizLLM } from './skillQuiz.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -272,6 +273,37 @@ function levelUp(scene) {
                 });
             }, 300);
         }
+
+        // Skill set LLM quiz at level 4
+        if (level === 4) {
+            gamePaused = true;
+            scene.scene.pause();
+            if (scoreTimer) scoreTimer.stop();
+            setTimeout(() => {
+                alert(`🚀 Incredible! You completed Level 3!
+
+Now, let's test your skills in "${userInfo.skill}" with 5 LLM-generated questions!
+
+Remember, $WGM isn't just a meme — it's a movement. Play, earn, and join the WAGMICE family. 🚗💨
+
+Want to buy? Check out Pump.fun, Raydium, or Jupiter. Need help? Hop into our Telegram: https://t.me/WagmicePortal
+
+Follow us on X: @Wagmice (https://x.com/Wagmice)
+Official Website: https://pb59.github.io/WagmiceToken/
+
+Now, let’s race!`);
+                startSkillQuizLLM({
+                    userInfo,
+                    scene,
+                    onComplete: (skillScore, skillTotal) => {
+                        alert(`Skill Quiz complete! You scored ${skillScore}/${skillTotal}. You're a true Wagmice pro!`);
+                        gamePaused = false;
+                        scene.scene.resume();
+                        if (scoreTimer) scoreTimer.active = true;
+                    }
+                });
+            }, 300);
+        }
     });
 }
 
@@ -456,6 +488,8 @@ window.addEventListener('DOMContentLoaded', () => {
         alert(msg + `\n\nRemember, $WGM isn't just a meme — it's a movement. Play, earn, and join the WAGMICE family. 🚗💨
 
 Want to buy? Check out Pump.fun, Raydium, or Jupiter. Need help? Hop into our Telegram: https://t.me/WagmicePortal
+
+Follow us on X: @Wagmice (https://x.com/Wagmice)
 
 Now, let’s race!`);
     }
