@@ -23,6 +23,7 @@ let player;
 let cursors;
 let aiCars = [];
 let scoreTimer;
+let bgMusic; // Add this at the top with other globals
 
 let gamePaused = true;
 let userInfo = null;
@@ -133,17 +134,45 @@ function create() {
     scoreTimer = new ScoreTimer(this);
 
     // Level display
-    levelText = this.add.text(350, 20, 'Level: 1', { fontSize: '28px', fill: '#fff' }).setOrigin(0.5, 0).setDepth(10);
+    //levelText = this.add.text(350, 20, 'Level: 1', { fontSize: '28px', fill: '#fff' }).setOrigin(0.5, 0).setDepth(10);
+    levelText = this.add.text(350, 20, `Level: ${level}`, { fontSize: '28px', fill: '#fff' }).setOrigin(0.5, 0).setDepth(10);
 
+    
     aiCars.forEach(aiCar => {
         this.physics.add.overlap(player, aiCar, () => {
-            this.add.text(200, 300, 'Collision!', { fontSize: '48px', fill: '#ff0' });
-            this.scene.pause();
-            scoreTimer.stop();
+            // On collision, reduce a life and reset player position
+            if (typeof player.lives === 'undefined') player.lives = 3;
+            player.lives -= 1;
+
+            // Show remaining lives
+            this.add.text(200, 300, `Collision! Lives left: ${player.lives}`, { fontSize: '36px', fill: '#ff0' }).setDepth(30);
+
+            if (player.lives > 0) {
+                // Reset player position and pause briefly
+                player.x = 350;
+                player.y = 500;
+                this.scene.pause();
+                scoreTimer.stop();
+                setTimeout(() => {
+                    this.scene.resume();
+                    scoreTimer.active = true;
+                }, 1200);
+            } else {
+                // Game over if no lives left
+                this.add.text(200, 350, 'Game Over!', { fontSize: '48px', fill: '#f00' }).setDepth(31);
+                this.scene.pause();
+                scoreTimer.stop();
+            }
         });
     });
 
-    this.sound.add('bgMusic').setLoop(true).play();
+    // Fix: Stop and destroy previous bgMusic if it exists
+    if (bgMusic) {
+        bgMusic.stop();
+        bgMusic.destroy();
+    }
+    bgMusic = this.sound.add('bgMusic', { loop: true });
+    bgMusic.play();
 
     const startBtn = document.getElementById('startBtn');
     const restartBtn = document.getElementById('restartBtn');
@@ -164,14 +193,22 @@ function create() {
         startBtn.style.display = 'none';
         restartBtn.style.display = '';
         stopBtn.style.display = '';
+        if (bgMusic) {
+            bgMusic.play();
+        }
     };
 
     restartBtn.onclick = () => {
+        if (bgMusic) {
+            bgMusic.stop();
+            bgMusic.destroy();
+        }
         this.scene.restart();
         gamePaused = false;
         startBtn.style.display = 'none';
         restartBtn.style.display = '';
         stopBtn.style.display = '';
+        // REMOVE the setTimeout that re-creates bgMusic here!
     };
 
     stopBtn.onclick = () => {
@@ -181,6 +218,9 @@ function create() {
         startBtn.style.display = '';
         restartBtn.style.display = 'none';
         stopBtn.style.display = 'none';
+        if (bgMusic) {
+            bgMusic.stop();
+        }
     };
 }
 
@@ -247,7 +287,7 @@ function levelUp(scene) {
                     onComplete: (score, total) => {
                         alert(`IQ Quiz complete! You scored ${score}/${total}. Ready for the next challenge!`);
                         gamePaused = false;
-                        scene.scene.resume();
+                        scene.scene.restart(); // Restart from current level
                         if (scoreTimer) scoreTimer.active = true;
                     }
                 });
@@ -267,7 +307,7 @@ function levelUp(scene) {
                     onComplete: (eqScore, eqTotal) => {
                         alert(`EQ Quiz complete! You scored ${eqScore}/${eqTotal}. You're ready to race again!`);
                         gamePaused = false;
-                        scene.scene.resume();
+                        scene.scene.restart(); // Restart from current level
                         if (scoreTimer) scoreTimer.active = true;
                     }
                 });
@@ -298,7 +338,7 @@ Now, let’s race!`);
                     onComplete: (skillScore, skillTotal) => {
                         alert(`Skill Quiz complete! You scored ${skillScore}/${skillTotal}. You're a true Wagmice pro!`);
                         gamePaused = false;
-                        scene.scene.resume();
+                        scene.scene.restart(); // Restart from current level
                         if (scoreTimer) scoreTimer.active = true;
                     }
                 });
