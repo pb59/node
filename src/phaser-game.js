@@ -337,9 +337,52 @@ Now, let’s race!`);
                     scene,
                     onComplete: (skillScore, skillTotal) => {
                         alert(`Skill Quiz complete! You scored ${skillScore}/${skillTotal}. You're a true Wagmice pro!`);
-                        gamePaused = false;
-                        scene.scene.restart(); // Restart from current level
-                        if (scoreTimer) scoreTimer.active = true;
+
+                        // Show Wagmice Champ Certificate and end the game
+                        setTimeout(() => {
+                            // Stop game loop and hide controls
+                            if (bgMusic) {
+                                bgMusic.stop();
+                            }
+                            document.getElementById('controls').style.display = 'none';
+
+                            document.body.innerHTML = `
+                                <div id="wagmice-certificate" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#222;color:#fff;">
+                                    <h1 style="font-size:2.5em;margin-bottom:0.5em;">🏆 Wagmice Champ Certificate 🏆</h1>
+                                    <p style="font-size:1.3em;">Congratulations, <b>${userInfo.name}</b>!</p>
+                                    <p style="font-size:1.1em;">You completed all challenges and proved your skills in <b>${userInfo.skill}</b>!</p>
+                                    <p style="margin:1.5em 0;">You are now a certified <b>Wagmice Champion</b>.<br>Share your achievement with the world!</p>
+                                    <button id="downloadCertBtn" style="margin:1em 0;padding:0.5em 1.5em;font-size:1em;">Download Certificate</button>
+                                    <div style="margin:1em 0;">
+                                        <a id="shareOnXBtn"
+                                            href="https://twitter.com/intent/tweet?text=I%20am%20a%20Wagmice%20Champion!%20🐭🚗💨%20@Wagmice%20https://pb59.github.io/WagmiceToken/"
+                                            target="_blank"
+                                            style="margin-right:1em;color:#1da1f2;">Share on X</a>
+                                        <a id="shareOnFbBtn"
+                                            href="https://www.facebook.com/sharer/sharer.php?u=https://pb59.github.io/WagmiceToken/"
+                                            target="_blank"
+                                            style="margin-right:1em;color:#4267B2;">Share on Facebook</a>
+                                        <a id="shareOnLinkedInBtn"
+                                            href="https://www.linkedin.com/sharing/share-offsite/?url=https://pb59.github.io/WagmiceToken/"
+                                            target="_blank"
+                                            style="color:#0077b5;">Share on LinkedIn</a>
+                                    </div>
+                                    <a href="https://pb59.github.io/WagmiceToken/" target="_blank" style="color:#ffd700;font-size:1.1em;margin-top:1em;">Visit Official Website</a>
+                                    <p style="margin-top:2em;font-size:1.2em;">🐭🚗💨</p>
+                                </div>
+                                <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+                                <script>
+                                document.getElementById('downloadCertBtn').onclick = function() {
+                                    html2canvas(document.getElementById('wagmice-certificate')).then(canvas => {
+                                        const link = document.createElement('a');
+                                        link.download = 'wagmice-certificate.png';
+                                        link.href = canvas.toDataURL();
+                                        link.click();
+                                    });
+                                };
+                                </script>
+                            `;
+                        }, 500);
                     }
                 });
             }, 300);
@@ -548,5 +591,9 @@ Before you dive into the world of $WGM on Solana, let's see how quick your mind 
 
 Ready? Let's go!`;
         alert(msg);
+    }
+
+    if (window.game) {
+        window.game.destroy(true);
     }
 });
