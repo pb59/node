@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>2D Car Racing1 Game</title>
   <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; }
     body {
-      margin: 0;
       background: #115;
       display: flex;
       flex-direction: row;
       align-items: flex-start;
-      height: 100vh;
       justify-content: center;
     }
+    canvas { display: block; width: 100vw !important; height: 100vh !important; }
     #controls {
       margin-right: 30px;
       margin-top: 60px;

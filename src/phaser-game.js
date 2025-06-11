@@ -643,3 +643,9 @@ Ready? Let's go!`;
 window.addEventListener('resize', () => {
     game.scale.resize(window.innerWidth, window.innerHeight);
 });
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        game.scale.resize(window.innerWidth, window.innerHeight);
+    }, 200);
+});
