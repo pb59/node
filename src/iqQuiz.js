@@ -52,8 +52,6 @@ export function startIQQuizLLM({ userInfo, scene, onComplete }) {
             iqAnswer.value = '';
             iqError.style.display = 'none';
             iqNextBtn.disabled = false;
-            iqNextBtn.style.display = ''; // Ensure button is visible
-            iqAnswer.focus();
         } else {
             finishIQQuiz();
         }
@@ -62,15 +60,6 @@ export function startIQQuizLLM({ userInfo, scene, onComplete }) {
     // Remove any previous handler before assigning a new one
     iqNextBtn.onclick = null;
     iqNextBtn.onclick = function() {
-        if (iqNextBtn.disabled) return;
-        iqNextBtn.disabled = true;
-        iqError.style.display = 'none';
-        if (!iqAnswer.value.trim()) {
-            iqError.textContent = "Please enter an answer.";
-            iqError.style.display = 'block';
-            iqNextBtn.disabled = false;
-            return;
-        }
         fetch('/groq', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -93,22 +82,20 @@ export function startIQQuizLLM({ userInfo, scene, onComplete }) {
         .catch(err => {
             iqError.textContent = "Could not check answer (GitHub Copilot error).";
             iqError.style.display = 'block';
-            iqNextBtn.disabled = false;
             console.error("LLM error:", err);
         });
     };
 
-    iqAnswer.onkeydown = function(e) {
+    iqAnswer.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             iqNextBtn.click();
         }
-    };
+    });
 
     function finishIQQuiz() {
         iqOverlay.style.display = 'none';
-        iqNextBtn.disabled = true;
-        iqNextBtn.style.display = 'none'; // Hide button after quiz
+        iqNextBtn.disabled = true; // Prevent further clicks
         // Show the START button so user can resume
         document.getElementById('startBtn').style.display = '';
         if (onComplete) onComplete(iqScore, iqQuestions.length);

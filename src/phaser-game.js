@@ -5,8 +5,8 @@ import { startSkillQuizLLM } from './skillQuiz.js';
 
 const config = {
     type: Phaser.AUTO,
-    width: Math.min(window.innerWidth, 700),
-    height: Math.min(window.innerHeight, 600),
+    width: window.innerWidth,
+    height: window.innerHeight,
     backgroundColor: "#87ceeb",
     physics: {
         default: 'arcade',
@@ -16,6 +16,10 @@ const config = {
         preload,
         create,
         update
+    },
+    scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     }
 };
 
@@ -222,6 +226,34 @@ function create() {
             bgMusic.stop();
         }
     };
+
+    // Touch controls for mobile
+    this.input.addPointer(2); // Allow multi-touch
+
+    this.input.on('pointerdown', pointer => {
+        if (pointer.x < this.cameras.main.width / 2) {
+            player.moveLeft = true;
+        } else {
+            player.moveRight = true;
+        }
+    });
+
+    this.input.on('pointerup', pointer => {
+        player.moveLeft = false;
+        player.moveRight = false;
+    });
+
+    this.input.on('pointermove', pointer => {
+        if (pointer.isDown) {
+            if (pointer.x < this.cameras.main.width / 2) {
+                player.moveLeft = true;
+                player.moveRight = false;
+            } else {
+                player.moveRight = true;
+                player.moveLeft = false;
+            }
+        }
+    });
 }
 
 function askGroq(promptText) {
@@ -410,8 +442,8 @@ function update() {
     });
 
     player.setVelocity(0);
-    if (cursors.left.isDown && player.x > 220) player.x -= 5;
-    if (cursors.right.isDown && player.x < 480) player.x += 5;
+    if ((cursors.left.isDown || player.moveLeft) && player.x > 220) player.x -= 5;
+    if ((cursors.right.isDown || player.moveRight) && player.x < 480) player.x += 5;
     if (cursors.up.isDown && player.y > 0) player.y -= 5;
     if (cursors.down.isDown && player.y < 600 - player.height * 0.7) player.y += 5;
 
@@ -606,4 +638,8 @@ Ready? Let's go!`;
             });
         };
     }
+});
+
+window.addEventListener('resize', () => {
+    game.scale.resize(window.innerWidth, window.innerHeight);
 });
