@@ -143,9 +143,83 @@
       display: none;
       margin-top: 8px;
     }
+    /* Auth Overlay Styles */
+    #authOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #authOverlay > div {
+      background: #fff;
+      padding: 2em;
+      border-radius: 10px;
+      min-width: 300px;
+    }
+    #authTitle {
+      margin: 0 0 1em 0;
+      font-size: 1.8em;
+      color: #333;
+    }
+    #authForm input {
+      width: 100%;
+      margin-bottom: 0.5em;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #authForm button {
+      width: 100%;
+      margin-bottom: 0.5em;
+      padding: 10px;
+      font-size: 1.1em;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #authForm button:hover {
+      background: #0056b3;
+    }
+    #toggleAuth {
+      color: #007bff;
+      cursor: pointer;
+    }
+    #toggleAuth:hover {
+      text-decoration: underline;
+    }
+    #authError {
+      color: red;
+      text-align: center;
+      margin-top: 0.5em;
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <!-- Login/Sign Up Modal -->
+  <div id="authOverlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;">
+    <div style="background:#fff;padding:2em;border-radius:10px;min-width:300px;">
+      <h2 id="authTitle">Sign Up</h2>
+      <form id="authForm">
+        <input type="text" id="authName" placeholder="Name" style="width:100%;margin-bottom:0.5em;" required />
+        <input type="email" id="authEmail" placeholder="Email" style="width:100%;margin-bottom:0.5em;" required />
+        <input type="password" id="authPassword" placeholder="Password" style="width:100%;margin-bottom:0.5em;" required />
+        <button type="submit" style="width:100%;margin-bottom:0.5em;">Sign Up</button>
+      </form>
+      <div style="text-align:center;">
+        <span id="toggleAuth" style="color:#007bff;cursor:pointer;">Already have an account? Login</span>
+      </div>
+      <div id="authError" style="color:red;text-align:center;margin-top:0.5em;display:none;"></div>
+    </div>
+  </div>
   <div id="userFormOverlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:100;">
     <form id="userForm" style="background:#222;padding:32px 40px;border-radius:12px;box-shadow:0 0 20px #000;display:flex;flex-direction:column;gap:18px;min-width:300px;">
       <label style="color:#fff;">Name: <input type="text" id="userName" required /></label>
